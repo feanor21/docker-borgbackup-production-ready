@@ -20,13 +20,18 @@ The configuration is made using the "docker-compose.yml" file.
 By default, this container make backup with no compression and no encryption. This can be change using the following environnement variables:
 
 BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK 
+
   Possible values: yes, no 
+  
   default: yes
 BORG_PASSPHRASE
+
   Possible values: any
+  
   Default: default
 
 BORG_COMPRESSION
+
   Possible values: a shell argument for borg supported by the borg version. 
   
   examples:
@@ -37,15 +42,21 @@ BORG_COMPRESSION
 
 
 ELASTIC_ADDR
+
   The full adresse of the elasticsearch server to send data
+  
   Default=http://127.0.0.1:9200
 
 NAME
+
   The backup name display on the elasticsearch logs
+  
   Default: MyBackup
   
 HOST
+
   The hostname displayed for the elasticsearch server
+  
   Default: MyServerName
 
 
