@@ -1,14 +1,17 @@
 Backup software README
 ======================
 
-Installation
-------------
 
 ### Software information ###
 
 We use the [BorgBackup](https://borgbackup.readthedocs.io/en/stable/index.html) open source software, a fork of the [Attic](https://attic-backup.org/) open source project.
 
 We selected this software based on a comparison of the linux backup softwares available on the [ArchLinux Wiki](https://wiki.archlinux.org/index.php/Synchronization_and_backup_programs)
+
+The goal here is to deploy multiple backup on machines, and to monitor their output.
+
+The container create log and send status information to elasticsearch. If there is no elasticsearch to get the status information, the jobs will still run.
+
 
 ### Docker image building ###
 
