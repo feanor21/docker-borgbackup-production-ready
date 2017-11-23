@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  borgbackup:
+    env_file: .env
+    image: borgbackup:stable-v1.4
+    container_name: borgbackup
+    hostname: $(hostname)
+    restart: unless-stopped
+    user: root
+    privileged: true
+    environment:
+      - BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      - BORG_PASSPHRASE='default'
+      - ELASTIC_ADDR=http://127.0.0.1:9200
+      - NAME='MyBackup'
+      - HOST='MyServerName'
+    volumes: 
+      - "/home/user:/root/origin" 
+      - "/root/backup:/root/destination"
+      - "/root/backup/log:/root/log" 
+
+
+

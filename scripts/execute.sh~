@@ -1,0 +1,77 @@
+#!/bin/bash
+ID=$(/usr/bin/curl -XGET $ELASTIC_ADDR/borg_log/$NAME/_search?pretty=true -d '{"fields":["_id"],"query": {"match_all": {}},"sort":{"date": "desc"},"size": 1}' |grep _id |cut -f2 -d ':'|cut -f1 -d ',' |sed 's/"//g')
+if [[ -z $ID ]]
+then
+ID=1
+else
+ID=$(($ID+1))
+fi
+
+if [ "$(ls -A /root/origin/)" ]; 
+then
+  /usr/bin/curl -XPUT "$ELASTIC_ADDR/borg_log/$NAME/$ID" -d "{
+  \"hostname\": \"$HOST\",
+  \"instance\": \"$NAME\",
+  \"date\": \"$(date +%Y-%m-%dT%H:%M:%S)\",
+  \"status\": \"starting_backup\"
+  }"
+  ID=$(($ID+1))
+  borg create -v -p -s --ignore-inode --exclude-if-present 'no-backup.ignore' /root/destination::"$NAME#$(date +"%d-%m-%y_at_%H:%M:%S")" /root/origin/ >> /root/log/borg.log 2>&1
+  ARCHIVE_STATUS=$?
+  
+  CHECK=$(borg list /root/destination|grep .checkpoint |cut -d ' ' -f1)
+
+for i in $CHECK
+do borg delete /root/destination::$i
+done
+  
+  borg prune -v /root/destination  --keep-daily=7 --keep-weekly=4 --keep-monthly=2  >>  /root/log/borg.log 2>&1
+#  borg prune -v /root/destination --save-space --keep-daily=1 --keep-weekly=1 --keep-monthly=1  >>  /root/log/borg.log 2>&1
+  PRUNE_STATUS=$?
+  if [[ $ARCHIVE_STATUS != 0 ]]
+    then  
+        echo "{ \"data\" :\"$(date +%Y-%m-%d:%H:%M:%S)\", \"message\" :  \"unknow error \"">>	 /root/log/error.log
+    /usr/bin/curl -XPUT "$ELASTIC_ADDR/borg_log/$NAME/$ID" -d "{
+    \"hostname\": \"$HOST\",
+    \"instance\": \"$NAME\",
+    \"date\": \"$(date +%Y-%m-%dT%H:%M:%S)\",
+    \"status\": \"failed\"
+    }" 
+    ID=$(($ID+1))
+ 
+   else
+    
+  /usr/bin/curl -XPUT "$ELASTIC_ADDR/borg_log/$NAME/$ID" -d "{
+  \"hostname\": \"$HOST\",
+  \"instance\": \"$NAME\",
+  \"date\": \"$(date +%Y-%m-%dT%H:%M:%S)\",
+  \"status\": \"success\"
+  }"
+  ID=$(($ID+1))
+
+  fi
+  
+  if [[ $PRUNE_STATUS != '0' ]]
+  then 
+      echo "{ \"data\" :\"$(date +%Y-%m-%d:%H:%M:%S)\", \"message\" :  \"prune failed \"">>	 /root/log/error.log
+    /usr/bin/curl -XPUT "$ELASTIC_ADDR/borg_log/$NAME/$ID" -d "{
+    \"hostname\": \"$HOST\",
+    \"instance\": \"$NAME\",
+    \"date\": \"$(date +%Y-%m-%dT%H:%M:%S)\",
+    \"status\": \"prune_failed\"
+    }" 
+    ID=$(($ID+1))
+    echo "prune failed"
+  fi
+  else 
+
+          echo "{ \"data\" :\"$(date +%Y-%m-%d:%H:%M:%S)\", \"message\" :  \"origin is empty, container need to be restart \"">>	 /root/log/error.log
+    /usr/bin/curl -XPUT "$ELASTIC_ADDR/borg_log/$NAME/$ID" -d "{
+    \"hostname\": \"$HOST\",
+    \"instance\": \"$NAME\",
+    \"date\": \"$(date +%Y-%m-%dT%H:%M:%S)\",
+    \"status\": \"failed_mount\"
+    }" 
+    ID=$(($ID+1))
+ fi
+

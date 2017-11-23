@@ -1,0 +1,9 @@
+IMAGE_NAME=ds2:5000/borgbackup
+IMAGE_TAG=stable-v1.34 
+build:
+	@echo 'building docker image'
+	@docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	
+push:
+	@echo 'pushing docker image'
+	@docker push $(IMAGE_NAME):$(IMAGE_TAG) 

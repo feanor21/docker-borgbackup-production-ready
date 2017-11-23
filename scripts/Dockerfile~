@@ -1,0 +1,14 @@
+FROM ds2:5000/borgbackup:stable-v1.1
+
+RUN rm -f /root/execute.sh /root/save.sh /root/launch.sh
+COPY execute.sh /root/execute.sh
+COPY save.sh /root/save.sh
+COPY launch.sh /root/launch.sh
+RUN chmod +x /root/execute.sh
+RUN chmod 644  /root/save.sh
+RUN chmod +x /root/launch.sh
+RUN crontab /root/save.sh
+ENV BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+ENV BORG_PASSPHRASE='toto'
+##add test pour borg init
+ENTRYPOINT /root/launch.sh >> /root/log/launch.log 2>&1
