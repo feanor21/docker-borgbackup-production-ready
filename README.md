@@ -28,10 +28,13 @@ BORG_PASSPHRASE
 
 BORG_COMPRESSION
   Possible values: a shell argument for borg supported by the borg version. 
+  
   examples:
+  ```
   BORG_PASSPHRASE='-C lz4';
   ORG_PASSPHRASE='-C zlib';
-  ...
+  ```
+
 
 ELASTIC_ADDR
   The full adresse of the elasticsearch server to send data
