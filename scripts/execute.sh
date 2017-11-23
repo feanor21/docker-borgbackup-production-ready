@@ -16,7 +16,7 @@ then
   \"status\": \"starting_backup\"
   }"
   ID=$(($ID+1))
-  borg create -v -p -s --ignore-inode --exclude-if-present 'no-backup.ignore' /root/destination::"$NAME#$(date +"%d-%m-%y_at_%H:%M:%S")" /root/origin/ >> /root/log/borg.log 2>&1
+  borg create -v -p -s --ignore-inode $BORG_COMPRESSION --exclude-if-present 'no-backup.ignore' /root/destination::"$NAME#$(date +"%d-%m-%y_at_%H:%M:%S")" /root/origin/ >> /root/log/borg.log 2>&1
   ARCHIVE_STATUS=$?
   echo 'deleting .checkpoint files'
   CHECK=$(borg list /root/destination|grep .checkpoint |cut -d ' ' -f1)

@@ -37,7 +37,7 @@ then
   \"status\": \"starting_backup\"
   }"
   ID=$(($ID+1))
-	borg create -v -p -s --ignore-inode --exclude-if-present 'no-backup.ignore' /root/destination::"$NAME#$(date +"%d-%m-%y_at_%H:%M:%S")" /root/origin/ >> /root/log/borg.log 2>&1 
+	borg create -v -p -s --ignore-inode --exclude-if-present $BORG_COMPRESSION 'no-backup.ignore' /root/destination::"$NAME#$(date +"%d-%m-%y_at_%H:%M:%S")" /root/origin/ >> /root/log/borg.log 2>&1 
 
   /usr/bin/curl -XPUT "$ELASTIC_ADDR/borg_log/$NAME/$ID" -d "{
   \"hostname\": \"$HOST\",
