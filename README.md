@@ -13,6 +13,39 @@ The goal here is to deploy multiple backup on machines, and to monitor their out
 The container create log and send status information to elasticsearch. If there is no elasticsearch to get the status information, the jobs will still run.
 
 
+### Configuration ###
+
+The configuration is made using the "docker-compose.yml" file.
+
+By default, this container make backup with no compression and no encryption. This can be change using the following environnement variables:
+
+BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK 
+  Possible values: yes, no 
+  default: yes
+BORG_PASSPHRASE
+  Possible values: any
+  Default: default
+
+BORG_COMPRESSION
+  Possible values: a shell argument for borg supported by the borg version. 
+  examples:
+  BORG_PASSPHRASE='-C lz4';
+  ORG_PASSPHRASE='-C zlib';
+  ...
+
+ELASTIC_ADDR
+  The full adresse of the elasticsearch server to send data
+  Default=http://127.0.0.1:9200
+
+NAME
+  The backup name display on the elasticsearch logs
+  Default: MyBackup
+  
+HOST
+  The hostname displayed for the elasticsearch server
+  Default: MyServerName
+
+
 ### Docker image building ###
 
 
