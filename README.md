@@ -24,6 +24,7 @@ BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK
   Possible values: yes, no 
   
   default: yes
+  
 BORG_PASSPHRASE
 
   Possible values: any
@@ -36,8 +37,8 @@ BORG_COMPRESSION
   
   examples:
   ```
-  BORG_PASSPHRASE='-C lz4';
-  ORG_PASSPHRASE='-C zlib';
+  BORG_COMPRESSION='-C lz4';
+  BORG_COMPRESSION='-C zlib';
   ```
 
 
