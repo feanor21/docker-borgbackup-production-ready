@@ -12,11 +12,9 @@ We selected this software based on a comparison of the linux backup softwares av
 
 ### Docker image building ###
 
-The backup software is packaged in an Ubuntu 16.04 docker image.
-To build the image, run the following command in the project directory :
 
 ```
-docker build -t borgbackup docker/unique_server/
+make build
 ```
 
 ### Docker container building ###
@@ -25,57 +23,15 @@ The docker container must be built mounting the origin and backup directories.
 To build and immediately stop the container, run the following command :
 
 ```
-docker run -id \
-    --name borgbackup_container \
-    -v <origin_path>:/root/origin \
-    -v <repository_path>:/root/destination \
-    --privileged \
-    borgbackup
-docker stop borgbackup_container
+docker-compose -f docker-compose.yml up -d
 ```
-For the version which integrate a cron scheduler, the command is a little bit different:
-```
-docker run -d \
---name borgbackup_container \
---restart=always \
--v /<origin_path>:/root/origin \
--v <repository_path>:/root/destination \
--v <log_repository_path>:/root/log \
--h $(hostname) \
---privileged \
-borgbackup:stable-v1.0
-```
+
 after launch it, data will me automatically saved from origin too destination each hour.
 
 Automatic backup setup
 ----------------------
 
-### Destination repository creation ###
-First we need to initialize a repository to store the backups. 
 
-To run the command through the container package use :
-```
-docker start borgbackup_container && docker exec -t borgbackup_container borg init /root/destination -e none && docker stop borgbackup_container
-```
-
-The general syntax is :
-```
-borg init <repository_path> -e none
-```
-
-The `-e none` parameter disable the encryption.
-
-
-### Software cron Setup ###
-To add the backup job to the crontab you can run the script :
-
-```
-sudo chmod +x ./scripts/add_crontab_job.sh
-sudo ./scripts/add_crontab_job.sh
-```
-
-Other commands for backup management
-------------------------------------
 
 ### Add backup command ###
 To do a backup from a directory to a repository, run the command :
@@ -89,35 +45,16 @@ borg create --ignore-inode -v -p -s [-C lzma] <repository_path>::<backup_name> <
 `<backup_path>` is the directory to backup
 `<exclude_pattern>` is a directory or pattern to exclude
 
-#### Example : ####
 
-```
-borg create --ignore-inode -v -p -s -C lzma destination::"backup of $(hostname) : $(date +"%d-%m-%y at %H:%M:%S")" origin/ -e "*.pyc"
-```
 
-### Prune backups command ###
-This command remove old backups to reclaim disk space.
-The command can be run to keep only one backup for each day of the last 7 days, or one backup each week for the last 4 weeks for example.
+### Restor data from backup ###
+These steps had to be done inside of the container, execpt if you have borg installed on the host machine.
 
-#### Example : ####
-This command will keep the last backups made each day for the past week, each week for the past month, and each months for the past 6 months.
-
-```
-borg prune -v <repository_path> --prefix "backup of $(hostname) :" --keep-hourly=168 --keep-daily=14 --keep-weekly=4 --keep-monthly=2000
-```
-
-### List backups and file ###
 It is possible to list the backups saved in a repository, and to list files in a backup
 
 ```
-borg list <repository_path>
-borg list <repository_path>::<backup_name>
-```
-
-#### Example ####
-
-```
-docker start borgbackup_container && docker exec -t borgbackup_container borg list /root/destination && docker stop borgbackup_container
+borg list /root/destination
+borg list /root/destination::<backup_name>
 ```
 
 
@@ -129,9 +66,10 @@ borg info -v <repository_path>::<backup_name>
 ```
 
 ### Restore backup ###
-The following command will restore a backup in the current directory :
+The following command will restore a backup in the '/root/restore' directory :
 
 ```
 borg mount /root/destination /root/restore
 borg umount /root/restore
 ```
+
